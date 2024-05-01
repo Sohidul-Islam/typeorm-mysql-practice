@@ -22,6 +22,10 @@ export class ProfileController {
   async getUsers(@QueryParams() params: any) {
     return await this.userService.getUsersByFilter(params);
   }
+  @Get("/filter2")
+  async getUsers2(@QueryParams() params: any) {
+    return await this.userService.getUsersByFilters2(params);
+  }
 
   @Post("/")
   async createUser(@Body({ required: false }) request: any) {

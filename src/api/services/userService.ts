@@ -119,6 +119,132 @@ export class UserService {
     };
   }
 
+  async getUsersByFilters(params: any) {
+    const { name, id, page = 1, pageSize = 10, searchKey } = params;
+
+    // Define selection conditions based on the extracted criteria
+    const conditions: any = {};
+    if (name) {
+      conditions.name = name;
+    }
+
+    if (id) {
+      conditions.id = id;
+    }
+
+    if (searchKey) {
+      conditions.or = [
+        { name: ILike(`%${searchKey}%`) },
+        { email: ILike(`%${searchKey}%`) },
+      ];
+    }
+
+    // if (searchKey) {
+    //   conditions.name = ILike(`%${searchKey}%`);
+    // }
+
+    // if (searchKey) {
+    //   conditions.email = ILike(`%${searchKey}%`);
+    // }
+
+    // Calculate skip value for pagination
+    const skip = (page - 1) * pageSize;
+
+    // Find users based on conditions with pagination
+    const [users, totalUsers] = await this.userRepo.findAndCount({
+      where: [
+        { name: ILike(`%${searchKey}%`) },
+        { email: ILike(`%${searchKey}%`) },
+      ],
+      // where: conditions,
+      skip,
+      take: pageSize,
+    });
+
+    const totalPages = Math.ceil(totalUsers / pageSize);
+
+    if (users?.length) {
+      return {
+        success: "success",
+        message: "user found",
+        data: users,
+        metaData: {
+          page,
+          pageSize,
+          totalPages,
+          totalData: totalUsers,
+        },
+      };
+    }
+
+    return {
+      succss: "failed",
+      message: "User Not found",
+      data: [],
+    };
+  }
+
+  async getUsersByFilters2(params: any) {
+    const { name, id, page = 1, pageSize = 10, searchKey } = params;
+
+    // Define selection conditions based on the extracted criteria
+    const conditions: any = [];
+    if (name) {
+      conditions.push({ name });
+    }
+
+    if (id) {
+      conditions.push({ id });
+    }
+
+    if (searchKey) {
+      conditions.push([
+        { name: ILike(`%${searchKey}%`) },
+        { email: ILike(`%${searchKey}%`) },
+      ]);
+    }
+
+    // if (searchKey) {
+    //   conditions.name = ILike(`%${searchKey}%`);
+    // }
+
+    // if (searchKey) {
+    //   conditions.email = ILike(`%${searchKey}%`);
+    // }
+
+    // Calculate skip value for pagination
+    const skip = (page - 1) * pageSize;
+
+    // Find users based on conditions with pagination
+    const [users, totalUsers] = await this.userRepo.findAndCount({
+      where: conditions,
+      skip,
+      take: pageSize,
+    });
+
+    const totalPages = Math.ceil(totalUsers / pageSize);
+
+    if (users?.length) {
+      return {
+        success: "success",
+        message: "user found",
+        data: users,
+        metaData: {
+          page,
+          pageSize,
+          totalPages,
+          totalData: totalUsers,
+        },
+      };
+    }
+
+    return {
+      succss: "failed",
+      message: "User Not found",
+      data: [],
+    };
+  }
+
   async updateUsers(data: any) {
     const { id } = data;
 
